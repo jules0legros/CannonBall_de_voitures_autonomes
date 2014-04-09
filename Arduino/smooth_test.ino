@@ -10,8 +10,8 @@ int j = 0;
 bool detected,stopSignal = false;
 int vit;
 int vit_max = 70;
-unsigned long size = 0;  // taille du marker coloré a tracker
-unsigned long pos = 0;   // position du marker coloré en pixel (sur 640)
+int size = 0;  // taille du marker coloré a tracker
+int pos = 0;   // position du marker coloré depuis le milieu de l'image (camera)
 
 //----------------------------------------------------------------
 // utiles pour lire les données du port serie
@@ -122,49 +122,6 @@ void routine(){
 
 
 void loop() {
- 
-	while (Serial.available() <= 0); // en attente de données depuis le port série
-	if (Serial.available() > 4)  // en attente de 4 octets (2 pour la taille 2 pour la position relative)
-	{
-
-		// obtention du int de 2 octets de la position relative depuis le port serie
-		MSB = Serial.read();
-//		delay(5);
-		LSB = Serial.read();
-		MSBLSB = word(MSB, LSB);
-		pos = MSBLSB;
-//		delay(5);
-   
-		int posR = (int) pos * 90 / 640 + 45 ; 	//on a une position en fonction de la taille de l'écran (640)
-        direction.write(posR); 					// l'angle de braquage va de 45 a 135 (range=90)
-		
-		// obtention du int de 2 octets de la taille depuis le port serie
-		MSB = Serial.read();
-//		delay(5);
-		LSB = Serial.read();
-		MSBLSB = word(MSB, LSB);
-		size = MSBLSB;
-//		delay(5);
-		
-		if (size<11500 && size>1500) {  //pour ne pas que la voiture aille trop vite
-			
-			// on a une vitesse en fonction de la taille de l'objet (plus il est gros, donc proche, moins elle est elevee)
-			// on fixe un angle de vit_max comme vitesse max et 1500 comme valeure min de taille d'objet pour avancer a la vitesse max
-			// avec une taille de 11500, la vitesse est nulle (objet trop pres) l'angle est de 90 (on entre dans la boucle suivente)
-			int puiss = (int) (size-1500)/500 + vit_max;	
-			propulsion.write(puiss);				
-			
-		}else if (size >=11500 && size <=1500) { // objet tres pres ou objet perdu (ou trop loin...)
-			propulsion.write(90);
-		}
-		
-/*
-		if (!tooFast()){
-			
-		}
-		else if (tooFast()){ //la vitesse est un angle negatif
-			while (tooFast())
-				decelerate(); // reduire vitesse du moteur de propulsion
-		}*/
-	}
+	accelerateSmooth(2000);
+	
 }
