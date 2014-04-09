@@ -177,7 +177,7 @@ void loop() {
 			
 			// on a une vitesse en fonction de la taille de l'objet (plus il est gros, donc proche, moins elle est elevee)
 			// on fixe un angle de vit_max comme vitesse max et 1500 comme valeure min de taille d'objet pour avancer a la vitesse max
-			// avec une taille de 11500, la vitesse est nulle (objet trop pres) l'angle est de 90 (on entre dans la boucle suivente)
+			// avec une taille de 11500, la vitesse est nulle (objet trop pres) l'angle est de 90 (on entre dans la boucle suivante)
 						
 			int puiss = (int) (size-1500)/666 + vit_max;	
 			propulsion.write(puiss);				
