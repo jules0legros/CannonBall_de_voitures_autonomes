@@ -38,10 +38,9 @@ void setup(){
 	propulsion.attach(9); // attention  particulièrement à cette initialisation, garder les roues motrices en l'air par précaution
 	propulsion.write(90);
 	
-	
 	  //Relier les masses du récepteur et de l'arduino, et
-	pinMode(5, INPUT);  // ch1 à la pin5 direction
-	pinMode(6, INPUT);  // ch2 à la pin6 propuslion
+	pinMode(5, INPUT);  // ch1 sur Arduino pin5 direction
+	pinMode(6, INPUT);  // ch2 sur Arduino pin6 propuslion
 	
 	Serial.begin(baudrate);        // connection au serial port
 	Serial.println("Starting Cannonball");
@@ -143,11 +142,13 @@ void emergency(){
 
 
 void loop() {
-	
+	emergency();
+	if (!stopSignal){
 	while (Serial.available() <= 0); // en attente de données depuis le port série
 	if (Serial.available() > 4)  // en attente de 4 octets (2 pour la taille 2 pour la position relative)
 	{
-		
+		emergency();
+		if (!stopSignal){
 		// obtention du int de 2 octets de la position relative depuis le port serie
 		MSB = Serial.read();
 //		delay(5);
@@ -155,14 +156,18 @@ void loop() {
 		MSBLSB = word(MSB, LSB);
 		pos = MSBLSB;
 //		delay(5);
+		}
 		
-		
+		emergency();
+		if (!stopSignal){
 		if (pos<641 && pos>-1) { // pour eviter les erreurs de positionnement
 		int posR = (int) pos * 90 / 640 + 45 ; 	//on a une position en fonction de la taille de l'écran (640)
         direction.write(posR); 					// l'angle de braquage va de 45 a 135 (range=90)
 		}
+		}
 		
-		
+		emergency();
+		if (!stopSignal){
 		// obtention du int de 2 octets de la taille depuis le port serie
 		MSB = Serial.read();
 //		delay(5);
@@ -170,22 +175,28 @@ void loop() {
 		MSBLSB = word(MSB, LSB);
 		size = MSBLSB;
 //		delay(5);
+		}
 		
-		
-		
+		emergency();
+		if (!stopSignal){
 		if (size<11500 && size>1500) {  //pour ne pas que la voiture aille trop vite
 			
 			// on a une vitesse en fonction de la taille de l'objet (plus il est gros, donc proche, moins elle est elevee)
 			// on fixe un angle de vit_max comme vitesse max et 1500 comme valeure min de taille d'objet pour avancer a la vitesse max
 			// avec une taille de 11500, la vitesse est nulle (objet trop pres) l'angle est de 90 (on entre dans la boucle suivente)
-						
-			int puiss = (int) (size-1500)/666 + vit_max;	
-			propulsion.write(puiss);				
 			
+			emergency();
+			if (!stopSignal){
+			int puiss = (int) (size-1500)/500 + vit_max;	
+			propulsion.write(puiss);				
+			}
 		}else if (size >=11500 && size <=1500) { // objet tres pres ou objet perdu (ou trop loin...)
-						
+			
+			emergency();
+			if (!stopSignal){
 			propulsion.write(90);
-					
+			}
+		}
 		}
 /*
 		if (!tooFast()){
@@ -196,5 +207,5 @@ void loop() {
 				decelerate(); // reduire vitesse du moteur de propulsion
 		}*/
 	}
-	
+	}
 }
